@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Config1D:
-    
+
     #grid settings
     Nsample: list = None
     Nx: int = None
@@ -13,9 +13,8 @@ class Config1D:
     Charge: list = None
     Ns: int =  1 # num of species
     S_name: str = "electrons"
-    Mr: int = 1 # Mass ratio for ionsA
+    Mr: int = 1 # Mass ratio for ions
     Nt_max: int  = 2000
-    
     
     #spline settings
     order: int = 3 # spline order
@@ -58,8 +57,8 @@ class Config1D:
         )
         
     def __post_init__(self):
-        self.Lx = 2*math.pi/self.k # spatial domain length
-        self.Lv = 2*math.pi # velocity domain length
+        self.Lx = 2*np.pi/self.k # spatial domain length
+        self.Lv = 2*np.pi # velocity domain length
         self.fini = [self.f0]
 
         if self.grids is None:
