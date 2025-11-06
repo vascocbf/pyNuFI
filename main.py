@@ -3,6 +3,7 @@ from initialize import initialize_simulation
 from fields import vPoisson
 import numpy as np
 from plotting import plot_results
+from nufi import step
 
 Nufi_fs = None
 Nufi_data = None
@@ -39,4 +40,25 @@ Nufi_data.time = 0
 Nufi_data.fs = Nufi_fs
 
 # Make initial plot 
+plot_results(Nufi_params, Nufi_data, Nufi_fs)
+
+
+# ---- Main loop ---- # 
+
+Nsamples = 0
+time = 0 
+
+for i in range(Nufi_params.Nt_max):
+
+    Nufi_params.it = i
+    
+    Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
+    
+    time += Nufi_params.dt
+    Nufi_params.time = time
+    Nufi_params.time_array.append(time)
+
+    # plot loop
+
+    #
 plot_results(Nufi_params, Nufi_data, Nufi_fs)

@@ -1,7 +1,7 @@
 from fields import vPoisson
 from scipy.interpolate import interp1d
 import numpy as np
-
+        
 
 def NuFi(params, data, fs):
     """
@@ -53,7 +53,7 @@ def NuFi(params, data, fs):
     data.Efield = Efield
     #data.Efield_list[:, iT] = Efield
 
-    return params, fs, data
+    return params, data, fs
 
 
 def sympl_flow_Half(n, dt, X, V, Efield, grid, params, charge, mass):
@@ -129,3 +129,13 @@ def interp1d_periodic(xq, xgrid, Fgrid, opts=None):
     
     f_interp = interp1d(xgrid, Fgrid, kind='cubic', fill_value="extrapolate")
     return f_interp(xq_mod)
+
+def step(params, data, fs):
+    """
+    Time step for simulation, update parameters, field, and fs
+    """
+
+    params, data, fs = NuFi(params, data, fs)
+    data.Efield_list[:,params.it] = data.Efield
+
+    return params, data, fs
