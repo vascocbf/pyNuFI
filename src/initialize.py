@@ -1,6 +1,6 @@
-from data import DataStorage
+from .data import DataStorage
 import numpy as np
-from grid import make_periodic_grid, Grid
+from .grid import make_periodic_grid, Grid
 
 def initialize_simulation(params):
     """

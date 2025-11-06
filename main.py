@@ -1,9 +1,12 @@
-from config import Config1D
-from initialize import initialize_simulation
-from fields import vPoisson
 import numpy as np
-from plotting import plot_results
-from nufi import step
+from src import Config1D, \
+                initialize_simulation, \
+                vPoisson, \
+                plot_results, \
+                step
+
+
+
 
 Nufi_fs = None
 Nufi_data = None

@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from fields import compute_density
+from .fields import compute_density
 
 def plot_results(params, data, fs, time=None):
     """

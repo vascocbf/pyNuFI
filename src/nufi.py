@@ -1,4 +1,4 @@
-from fields import vPoisson
+from .fields import vPoisson
 from scipy.interpolate import interp1d
 import numpy as np
         
