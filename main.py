@@ -26,8 +26,7 @@ Nufi_params = Config1D(
     eps=1e-2,                      # perturbation amplitude
     v0=3                           # electron drift velocity
 )
-# Run post-init to set derived attributes like Lx, Lv, and fini
-Nufi_params.__post_init__()
+
 
 # Start grid and fs 
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)

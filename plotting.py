@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from fields import compute_density
 
 def plot_results(params, data, fs, time=None):
     """
@@ -12,10 +13,11 @@ def plot_results(params, data, fs, time=None):
         Distribution function for all species
     """
     Ns = params.Ns
-    fig, axes = plt.subplots(Ns + 1, 1, figsize=(8, 3*(Ns+1)))
+    total_plots = Ns + 2 
+    fig, axes = plt.subplots(total_plots, 1, figsize=(8, 3*(total_plots)))
 
     # Ensure axes is always a list
-    if Ns + 1 == 1:
+    if total_plots == 1:
         axes = [axes]
     else:
         axes = axes.flatten()  # flatten if it’s an array
@@ -41,6 +43,14 @@ def plot_results(params, data, fs, time=None):
     ax.set_xlabel(r"$x$")
     ax.grid(True)
 
+    # Plot 1 - density
+    ax = axes[Ns+1]
+    density = compute_density(fs, params.grids[0].dv)
+    ax.plot(x, 1 - density)
+    ax.set_xlim([x[0], x[-1]])
+    ax.set_title(r"$1 - \rho$")
+    ax.set_xlabel(r"$x$")
+    ax.grid(True)
     
     plt.tight_layout()
     plt.pause(0.01)
