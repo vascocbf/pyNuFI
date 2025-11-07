@@ -1,57 +1,55 @@
 import matplotlib.pyplot as plt
 from .fields import compute_density
+import numpy as np
 
-def plot_results(params, data, fs, time=None):
+def plot_results(params, data, fs, initial_plot=False):
     """
-    Plot the distribution function and electric field.
-
-    Parameters
-    ----------
-    params : object
-        Simulation parameters, must have `Ns`, `grids`, `species_name`, and `Efield`.
-    fs : ndarray, shape (Nv, Nx, Ns)
-        Distribution function for all species
+    Plot the distribution function, electric field, density, and field energy evolution.
     """
-    Ns = params.Ns
-    total_plots = Ns + 2 
-    fig, axes = plt.subplots(total_plots, 1, figsize=(8, 3*(total_plots)))
+    Ns = params.Ns  # typically 1
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    axes = axes.flatten()
 
-    # Ensure axes is always a list
-    if total_plots == 1:
-        axes = [axes]
-    else:
-        axes = axes.flatten()  # flatten if it’s an array
+    # === Plot 1: distribution function ===
+    ax = axes[0]
+    X = params.grids[0].Xsample_grid
+    V = params.grids[0].Vsample_grid
+    im = ax.pcolormesh(X, V, fs[:, :, 0], shading='auto')
+    ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$v$")
+    fig.colorbar(im, ax=ax)
 
-    # Plot distribution function for each species
-    for s in range(Ns):
-        ax = axes[s]
-        X = params.grids[s].Xsample_grid
-        V = params.grids[s].Vsample_grid
-        im = ax.pcolormesh(X, V, fs[:, :, s], shading='auto')
-        ax.set_title(r"$f_\mathrm{" + params.S_name[s] + "}$")
-        ax.set_xlabel(r"$x$")
-        ax.set_ylabel(r"$v$")
-        fig.colorbar(im, ax=ax)
-
-    # Plot electric field
-    ax = axes[Ns]
+    # === Plot 2: electric field ===
+    ax = axes[1]
     x = params.grids[0].x
     Efield = data.Efield
     ax.plot(x, Efield)
     ax.set_xlim([x[0], x[-1]])
-    ax.set_title("$E$" + (f" at t = {time:.2f}" if time is not None else ""))
+    ax.set_title(r"$E$" + f" at t = {data.time:.2f}")
     ax.set_xlabel(r"$x$")
     ax.grid(True)
 
-    # Plot 1 - density
-    ax = axes[Ns+1]
+    # === Plot 3: 1 - density ===
+    ax = axes[2]
     density = compute_density(fs, params.grids[0].dv)
     ax.plot(x, 1 - density)
     ax.set_xlim([x[0], x[-1]])
     ax.set_title(r"$1 - \rho$")
     ax.set_xlabel(r"$x$")
     ax.grid(True)
-    
+
+    # === Plot 4: field energy evolution ===
+    if initial_plot == False:
+        ax = axes[3]
+        maxE = 0.5 * np.sum(data.Efield_list**2, axis=0)
+        ts = np.arange(len(maxE)) * params.dt 
+        ax.semilogy(ts, maxE)
+        ax.set_title(r"$\frac{1}{2}\sum_x E^2$ vs time")
+        ax.set_xlabel(r"$t$")
+        ax.set_ylabel("Energy (log scale)")
+        ax.grid(True)
+
     plt.tight_layout()
     plt.pause(0.01)
     plt.show()

@@ -18,7 +18,7 @@ class Config1D:
     
     #spline settings
     order: int = 3 # spline order
-    use_mex: bool = True
+    use_mex: bool = False 
     scheme: str = "lagrange-bary"
     
     #sim settings
