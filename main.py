@@ -21,7 +21,7 @@ Nufi_params = Config1D(
     S_name="two_stream",          # simulation case name
     Mr=1,                         # mass ratio for ions
     Nt_max=4000,                  # maximum number of time steps
-    dt=1/5,                       # time step size
+    dt=1/10,                       # time step size
     dt_save=10,                   # save interval (not used)
     t_end=50,                     # end time of simulation
     plot_freq=5,                  # iterations between plotting
@@ -57,7 +57,7 @@ for i in range(Nufi_params.Nt_max):
     time += Nufi_params.dt
     Nufi_params.time = time
     Nufi_params.time_array.append(time)
-    print(f"sim time = {Nufi_params.time}")
+    print(f"sim time = {round(Nufi_params.time,3)}")
     # plot loop
 
     #
