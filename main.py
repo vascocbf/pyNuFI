@@ -23,7 +23,7 @@ Nufi_params = Config1D(
     Nt_max=4000,                  # maximum number of time steps
     dt=1/10,                       # time step size
     dt_save=10,                   # save interval (not used)
-    t_end=50,                     # end time of simulation
+    t_end=30,                     # end time of simulation
     plot_freq=5,                  # iterations between plotting
     measure_freq=1,               # iterations between measurements
     k=0.5,                        # wave number
@@ -58,7 +58,10 @@ for i in range(Nufi_params.Nt_max):
     Nufi_params.time = time
     Nufi_params.time_array.append(time)
     print(f"sim time = {round(Nufi_params.time,3)}")
+    if i % (1) == 0:
+        plot_results(Nufi_params, Nufi_data, Nufi_fs)
     # plot loop
 
     #
 plot_results(Nufi_params, Nufi_data, Nufi_fs)
+
