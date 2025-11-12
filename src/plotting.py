@@ -51,5 +51,6 @@ def plot_results(params, data, fs, initial_plot=False):
         ax.grid(True)
 
     plt.tight_layout()
-    plt.pause(0.01)
-    plt.show()
+#   plt.pause(0.01)
+#    plt.show()
+    plt.savefig("plot.png")
