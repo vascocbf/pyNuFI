@@ -47,7 +47,7 @@ def NuFi(params, data, fs):
 
     # Update parameters
     data.Efield = Efield
-    #data.Efield_list[:, iT] = Efield
+    data.Efield_list[:, iT] = Efield
 
     return params, data, fs
 
@@ -78,55 +78,56 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
         return V_
 
     # Acceleration field (velocity update from electric field)
-    def Uv(X_, V_, E):
-        # Interpolate Efield at positions X_ and reshape to grid
-        E_interp = interp1d_periodic(X_.ravel(), params.grids[0].x, E)
-        return np.array(E_interp)
+    def Uv(X_, E):
+    # Interpolate E(x) onto the 2D X_ grid; returns shape like X_
+        return interp1d_periodic(X_, params.grids[0].x, E)
+
     # Full steps if n > 2
     if n > 1:
         for i in range(n - 1):
             X = X - dt * Ux(X, V)
+            X = wrap_periodic(X, params.grids[0].x)   # <-- add this line
             # Use the corresponding past Efield if needed; here we just use current
-            V = V - dt * Uv(X, V, Efield_list_normed[:,n-i])
+            V = V + dt * Uv(X, Efield_list_normed[:, n - i])
 
     # Final half step
     X = X - dt * Ux(X, V)
-    V = V + 0.5 * dt * Uv(X, V, Efield_list_normed[:,0])
+    X = wrap_periodic(X, params.grids[0].x)   # <-- add this line
+    V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     return X, V
 
+def wrap_periodic(X, xgrid):
+    dx = xgrid[1] - xgrid[0]
+    L  = dx * len(xgrid)
+    x0 = xgrid[0]
+    return (X - x0) % L + x0
 
-def interp1d_periodic(xq, xgrid, Fgrid, opts=None):
+def interp1d_periodic(xq, xgrid, Fgrid):
     """
-    1D periodic interpolation of Fgrid(xgrid) onto points xq.
-    
-    Parameters
-    ----------
-    xq : array_like
-        Query points.
-    xgrid : array_like
-        Original grid points (assume uniform or sorted).
-    Fgrid : array_like
-        Function values at xgrid.
-
-    Returns
-    -------
-    F_interp : np.ndarray
-        Interpolated values at xq.
+    Periodic cubic interpolation of Fgrid(xgrid) evaluated at xq.
+    - xgrid: shape (Nx,), strictly periodic (no duplicated endpoint).
+    - Fgrid: shape (Nx,)
+    - xq   : any shape (...), returns same shape as xq
     """
-    
     xgrid = np.asarray(xgrid)
     Fgrid = np.asarray(Fgrid)
-    xq = np.asarray(xgrid)  ## whatch out changed from np.asarray(xq)
-    
-    
-    #L = xgrid[-1] - xgrid[0] + (xgrid[1] - xgrid[0])  # domain length
-    #xq_mod = (xq - xgrid[0]) % L + xgrid[0]           # wrap into domain
-    
-    spline = CubicSpline(xgrid, Fgrid)  
-    #f_interp = interp1d(xgrid, Fgrid, kind='cubic', fill_value="extrapolate")
-    f_interp = [spline(i) for i in xq]
-    return f_interp  # used to be f_interp(xq_mod)
+    xq    = np.asarray(xq)
+
+    dx = xgrid[1] - xgrid[0]
+    L  = dx * len(xgrid)
+    x0 = xgrid[0]
+
+    # wrap queries into [x0, x0+L)
+    xq_mod = (xq - x0) % L + x0
+
+    # append duplicate endpoint for the spline only
+    x_ext = np.concatenate([xgrid, [x0 + L]])
+    F_ext = np.concatenate([Fgrid, [Fgrid[0]]])
+
+    spline = CubicSpline(x_ext, F_ext, bc_type='periodic')
+    Fq = spline(xq_mod)            # vectorized; same shape as xq
+    return Fq
 
 def step(params, data, fs):
     """
