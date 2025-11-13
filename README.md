@@ -4,7 +4,8 @@ dependencies:
 - numpy
 - scipy
 - matplotlib.pyplot
+- ffmpeg
 
 run with:
 
-python3 main.py
+./simulate

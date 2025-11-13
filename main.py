@@ -6,8 +6,6 @@ from src import Config1D, \
                 step
 
 
-
-
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
@@ -21,10 +19,10 @@ Nufi_params = Config1D(
     S_name="two_stream",          # simulation case name
     Mr=1,                         # mass ratio for ions
     Nt_max=4000,                  # maximum number of time steps
-    dt=1/10,                       # time step size
+    dt=1/10,                      # time step size
     dt_save=10,                   # save interval (not used)
     t_end=30,                     # end time of simulation
-    plot_freq=5,                  # iterations between plotting
+    plot_freq=10,                 # iterations between plotting
     measure_freq=1,               # iterations between measurements
     k=0.5,                        # wave number
     eps=1e-2,                     # perturbation amplitude
@@ -43,12 +41,13 @@ Nufi_data.time = 0
 Nufi_data.fs = Nufi_fs
 
 # Make initial plot 
-plot_results(Nufi_params, Nufi_data, Nufi_fs, initial_plot=True)
+plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots",
+             savename="initial_plot", saving=True)
 # ---- Main loop ---- # 
 
 Nsamples = 0
 time = 0 
-
+framenr = 1
 for i in range(Nufi_params.Nt_max):
     
     Nufi_params.it = i
@@ -58,10 +57,11 @@ for i in range(Nufi_params.Nt_max):
     Nufi_params.time = time
     Nufi_params.time_array.append(time)
     print(f"sim time = {round(Nufi_params.time,3)}")
-    if i % (1) == 0:
-        plot_results(Nufi_params, Nufi_data, Nufi_fs)
-    # plot loop
 
-    #
-plot_results(Nufi_params, Nufi_data, Nufi_fs)
+    # Plot at frequency
+    if i % (Nufi_params.plot_freq) == 0:
+        plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots/frames", savename=f"{framenr}", saving=True)
+        framenr+=1
 
+# Plot Final results
+plot_results(Nufi_params, Nufi_data, Nufi_fs, savename="finalplot", saving=True)

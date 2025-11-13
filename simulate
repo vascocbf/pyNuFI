@@ -1,0 +1,15 @@
+#!/bin/bash
+ 
+set -e 
+
+echo "Creating ./plots/ and ./plots/frames/"
+mkdir -p ./plots/frames/
+
+echo "Emptying ./../frames/"
+rm -rf ./plots/frames/*.png
+
+echo "Starting Simulation"
+python3 ./main.py
+
+ffplay -framerate 5 -i ./plots/frames/%d.png
+
