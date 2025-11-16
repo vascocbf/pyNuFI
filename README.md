@@ -6,6 +6,6 @@ dependencies:
 - matplotlib.pyplot
 - ffmpeg
 
-run with:
+run simulation with ./simulate 
 
-./simulate
+after simulating make .mp4 animation with ./animate
