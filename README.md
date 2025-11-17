@@ -4,7 +4,8 @@ dependencies:
 - numpy
 - scipy
 - matplotlib.pyplot
+- ffmpeg
 
-run with:
+run simulation with ./simulate 
 
-python3 main.py
+after simulating make .mp4 animation with ./animate
