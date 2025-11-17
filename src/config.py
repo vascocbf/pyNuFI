@@ -3,7 +3,11 @@ from dataclasses import dataclass
 
 @dataclass
 class Config1D:
+    """
+    starts parameters
+    starts initial condition
 
+    """
     #grid settings
     Nsample: list = None
     Nx: int = None

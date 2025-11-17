@@ -4,7 +4,10 @@ from .grid import make_periodic_grid, Grid
 
 def initialize_simulation(params):
     """
-    Initialize grids, distribution functions, and storage arrays.
+    Initialize:
+    grids, 
+    distribution functions,
+    and storage arrays.
     """
     data = DataStorage()
     
@@ -16,8 +19,12 @@ def initialize_simulation(params):
         # Expand scalar values to lists
         if np.isscalar(Nsample):
             Nsample = [Nsample, Nsample]
+        else:
+            Nsample = [params.Nx, params.Nv]
         if np.isscalar(Nmap):
             Nmap = [Nmap, Nmap]
+        else:
+            Nmap = [params.Nx, params.Nv]
 
         # Validate grids
         if any(np.array(Nsample) % np.array(Nmap) != 0):
@@ -63,10 +70,6 @@ def initialize_simulation(params):
             Dv=grid_sample.Dv,
             kx=grid_sample.kx,
             kx2=grid_sample.kx2,
-            kv=grid_sample.kv,
-            kv2=grid_sample.kv2,
-            Vperiodic=grid_sample.Vperiodic,
-            Weights=grid_sample.Weights
         )
         params.grids.append(grid_obj)
 
