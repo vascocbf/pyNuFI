@@ -1,4 +1,4 @@
 .ipynb_checkpoints/
 *.ipynb
 __pycache__/
-plots/
+plots/frames/
