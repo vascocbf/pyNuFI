@@ -17,7 +17,6 @@ class Config1D:
     Charge: list = None
     Ns: int =  1 # num of species
     S_name: str = "electrons"
-    Mr: int = 1 # Mass ratio for ions
     Nt_max: int  = 2000
     
     #spline settings

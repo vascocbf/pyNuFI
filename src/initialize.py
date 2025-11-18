@@ -13,18 +13,24 @@ def initialize_simulation(params):
     
     for s in range(params.Ns):
         # Use separate sample and map grids
-        Nsample = params.Nsample
-        Nmap = params.Nmap
+
+        # use Nx and Nv if defined
+        if params.Nx!=None and params.Nv!=None :
+            Nsample = [params.Nx, params.Nv]
+            Nmap = [params.Nx, params.Nv]
+        else:
+            Nsample = params.Nsample
+            Nmap = params.Nmap
 
         # Expand scalar values to lists
         if np.isscalar(Nsample):
             Nsample = [Nsample, Nsample]
-        else:
-            Nsample = [params.Nx, params.Nv]
+        #else:
+        #    Nsample = [params.Nx, params.Nv]
         if np.isscalar(Nmap):
             Nmap = [Nmap, Nmap]
-        else:
-            Nmap = [params.Nx, params.Nv]
+        #else:
+        #    Nmap = [params.Nx, params.Nv]
 
         # Validate grids
         if any(np.array(Nsample) % np.array(Nmap) != 0):

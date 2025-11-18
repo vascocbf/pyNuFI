@@ -79,14 +79,14 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
 
     # Acceleration field (velocity update from electric field)
     def Uv(X_, E):
-    # Interpolate E(x) onto the 2D X_ grid; returns shape like X_
+    # Interpolate E(x) onto the X_ grid; returns shape like X_
         return interp1d_periodic(X_, params.grids[0].x, E)
 
     # Full steps if n > 2
     if n > 1:
         for i in range(n - 1):
             X = X - dt * Ux(X, V)
-            X = wrap_periodic(X, params.grids[0].x)   # <-- add this line
+            X = wrap_periodic(X, params.grids[0].x)
             # Use the corresponding past Efield if needed; here we just use current
             V = V + dt * Uv(X, Efield_list_normed[:, n - i])
 

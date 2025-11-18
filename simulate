@@ -2,30 +2,26 @@
  
 set -e 
 
-echo "Creating ./plots/ and ./plots/frames/"
-mkdir -p ./plots/frames/
-
-echo "Emptying ./../frames/"
-rm -rf ./plots/frames/*.png
-
-
 read -p "Empty ./plots/? (y/N): " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
-    echo "Emptying ./plots/"
+    echo -e "Emptying ./plots/\n"
     rm -rf ./plots/*
     
 else
-    echo "./plots/ not emptied"
+    echo -e "./plots/ not emptied\n"
 fi
 
-echo "Simulation settings at ./main.py"
+echo -e "Creating ./plots/ and ./plots/frames/\n"
+mkdir -p ./plots/frames/
+
 read -p "Run simulation? (y/N): " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
-    echo "Starting Simulation"
+    echo -e "Starting Simulation\n"
     python3 ./main.py
 
     ffplay -framerate 5 -i ./plots/frames/%d.png
+    
 else
-    echo "Simulation canceled"
+    echo -e "Nothing was done\n"
 fi
 

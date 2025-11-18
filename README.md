@@ -22,3 +22,10 @@ workflow:
 - ufl expression to have distribution as np array by doing:
 u_h.as_numpy[:]= space.interpolate(f(x))
 this u_h will be your fs
+
+
+--- 
+
+# To-do
+
+- initialize also if only Nx and Nv, if Nsamp or Nmap = none
