@@ -9,8 +9,6 @@ from src import Config1D, \
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
-    Nsample=[2**6, 2**6],         # sample grid points
-    Nmap=[2**6, 2**6],            # map grid points
     Nx=2**6,                      # optional, can leave as None
     Nv=2**6,                      # optional, can leave as None
     Mass=[1],                     # species mass
@@ -19,7 +17,6 @@ Nufi_params = Config1D(
     S_name="two_stream",          # simulation case name
     Nt_max=4000,                  # maximum number of time steps
     dt=1/10,                      # time step size
-    dt_save=10,                   # save interval (not used)
     t_end=30,                     # end time of simulation
     plot_freq=5,                 # iterations between plotting
     measure_freq=1,               # iterations between measurements

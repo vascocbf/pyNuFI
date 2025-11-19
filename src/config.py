@@ -9,10 +9,8 @@ class Config1D:
 
     """
     #grid settings
-    Nsample: list = None
     Nx: int = None
     Nv: int = None
-    Nmap: list = None
     Mass: list = None
     Charge: list = None
     Ns: int =  1 # num of species
@@ -26,7 +24,6 @@ class Config1D:
     
     #sim settings
     dt: float = 0.1 # time step
-    dt_save: int = 5 # save after dt_same time
     t_end: int = 20
     plot_freq: int = 5 # iterations between plots
     measure_freq: int = 1 # iterations between measurements
@@ -67,10 +64,6 @@ class Config1D:
         if self.grids is None:
             self.grids = []
         #grid settings
-        if self.Nsample is None:
-            self.Nsample = [2**8, 2**8] # num of sample grid points
-        if self.Nmap is None:
-            self.Nmap = [2**6, 2**6] # num of saved map grid points 
         if self.Mass is None:
             self.Mass = [1]
         if self.Charge is None:

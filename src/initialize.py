@@ -12,70 +12,28 @@ def initialize_simulation(params):
     data = DataStorage()
     
     for s in range(params.Ns):
-        # Use separate sample and map grids
-
         # use Nx and Nv if defined
-        if params.Nx!=None and params.Nv!=None :
-            Nsample = [params.Nx, params.Nv]
-            Nmap = [params.Nx, params.Nv]
-        else:
-            Nsample = params.Nsample
-            Nmap = params.Nmap
-
-        # Expand scalar values to lists
-        if np.isscalar(Nsample):
-            Nsample = [Nsample, Nsample]
-        #else:
-        #    Nsample = [params.Nx, params.Nv]
-        if np.isscalar(Nmap):
-            Nmap = [Nmap, Nmap]
-        #else:
-        #    Nmap = [params.Nx, params.Nv]
-
-        # Validate grids
-        if any(np.array(Nsample) % np.array(Nmap) != 0):
-            raise ValueError("Nsample must be a multiple of Nmap for each dimension")
-        if any(np.array(Nmap) > np.array(Nsample)):
-            raise ValueError("Nmap must not be bigger than Nsample")
+        N = [params.Nx, params.Nv]
 
         # Create sample and map grids
-        grid_sample = make_periodic_grid(params.Lx, params.Lv, Nsample[0], Nsample[1])
-        grid_map = make_periodic_grid(params.Lx, params.Lv, Nmap[0], Nmap[1])
-        grid_sample.method = "spline"
-        grid_map.method = "spline"
-
-        # Create index mapping from sample grid to map grid
-        ratio_x = Nsample[0] // Nmap[0]
-        ratio_v = Nsample[1] // Nmap[1]
-        idx_sample_to_map = (
-            np.arange(0, Nsample[0], ratio_x),
-            np.arange(0, Nsample[1], ratio_v)
-        )
+        grid = make_periodic_grid(params.Lx, params.Lv, N[0], N[1])
 
         # Create Grid dataclass instance
         grid_obj = Grid(
-            sample=grid_sample,
-            map=grid_map,
-            idx_sample_to_map=idx_sample_to_map,
-            x=grid_sample.x,
-            v=grid_sample.v,
-            X=grid_sample.X,
-            V=grid_sample.V,
-            Xsample_grid=grid_sample.X,
-            Vsample_grid=grid_sample.V,
-            size=grid_sample.size,
-            size_sample_grid=grid_sample.size_sample_grid,
-            dom=getattr(grid_sample, "dom", None),
-            dx=grid_sample.dx,
-            dv=grid_sample.dv,
-            Lx=grid_sample.Lx,
-            Lv=grid_sample.Lv,
-            Nx=grid_sample.Nx,
-            Nv=grid_sample.Nv,
-            Dx=grid_sample.Dx,
-            Dv=grid_sample.Dv,
-            kx=grid_sample.kx,
-            kx2=grid_sample.kx2,
+            x=grid.x,
+            v=grid.v,
+            X=grid.X,
+            V=grid.V,
+            Xsample_grid=grid.X,
+            Vsample_grid=grid.V,
+            dx=grid.dx,
+            dv=grid.dv,
+            Lx=grid.Lx,
+            Lv=grid.Lv,
+            Nx=grid.Nx,
+            Nv=grid.Nv,
+            kx=grid.kx,
+            kx2=grid.kx2,
         )
         params.grids.append(grid_obj)
 
@@ -91,21 +49,6 @@ def initialize_simulation(params):
     for s in range(params.Ns):
         fini_func = params.fini[s]
         fs[:, :, s] = fini_func(params.grids[s].Xsample_grid, params.grids[s].Vsample_grid)
-
-    # Save parameters for time stepping
-    if hasattr(params, "dt_save"):
-        dt_save = params.dt_save
-        dit_save = dt_save / params.dt
-        params.dit_save = dit_save
-        if not dit_save.is_integer() or dt_save < params.dt:
-            raise ValueError("dt_save is not a proper divisor of dt")
-        Nsamples = int(params.Nt_max / dit_save)
-        data.fs = np.zeros(params.grids[0].size_sample_grid + (Nsamples, params.Ns))
-        data.Efield = np.zeros((params.grids[0].Nx, Nsamples))
-        data.time = dt_save * np.arange(1, Nsamples + 1)
-    else:
-        params.dit_save = params.Nt_max + 2
-        data = None
 
     # Default plotting and measurement frequencies
     if not hasattr(params, "plot_freq") or params.plot_freq == 0:
