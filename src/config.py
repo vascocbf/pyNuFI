@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from dune.fem.function import gridFunction
 from dune.grid import structuredGrid
 from math import pi, cos, exp, sqrt
+from typing import Any
 
 @dataclass
 class Config1D:
@@ -55,10 +56,13 @@ class Config1D:
     #    )
 
     # Dune objects, definition at __post_init__
-    gridView = None
-    expression_ini = None
-    fini = None 
+    gridView: Any = None
+    expression_ini: Any = None
+    fini: Any = None
         
+    x_sampling_grid: np.ndarray = None
+    v_sampling_grid: np.ndarray = None
+
     def __post_init__(self):
         self.Lx = 2*np.pi/self.k # spatial domain length
         self.Lv = 2*np.pi # velocity domain length
@@ -81,3 +85,16 @@ class Config1D:
         
         # a dune.fem gridFunction
         self.fini = gridFunction(self.expression_ini, gridView=self.gridView, name='fini', order=self.order)
+        self.dv = self.Lv/self.Nv_eval
+        
+        # Fourier wavenumbers
+        self.kx = np.fft.fftshift((2*np.pi/self.Lx) * np.arange(-self.Nx_eval//2, self.Nx_eval//2))
+        self.kx2 = self.kx**2
+        self.kx2[0] = 1.0
+
+        if self.x_sampling_grid is None:
+            self.x_sampling_grid = np.linspace(0, self.Lx, num=self.Nx_eval)
+        if self.v_sampling_grid is None:
+            self.v_sampling_grid = np.linspace(-self.Lv, self.Lv, num=self.Nv_eval)
+
+

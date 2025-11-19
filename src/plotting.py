@@ -7,7 +7,6 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     """
     Plot the distribution function, electric field, density, and field energy evolution.
     """
-    Ns = params.Ns  
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     axes = axes.flatten()
 

@@ -1,32 +1,26 @@
 import numpy as np
 from dune.common import FieldVector
 
-def eval_f(params):
+def eval_f(params, x_vals, v_vals):
     """
-    Given a gridFunction, return evaluation of f on spline
-    return np.array with shape (Nx_eval, Nv_eval)
+    Parameters: Nufi_params, x array to eval, v array to eval
+    return evaluation of f on spline
+    return type np.array with shape (Nx_eval, Nv_eval)
     """
-    Nx_eval = params.Nx_eval
-    Nv_eval = params.Nv_eval
-
-    x_vals = np.linspace(0, params.Lx, num=Nx_eval)
-    v_vals = np.linspace(-params.Lv, params.Lv, num=Nv_eval)
-    fini = params.fini # a Dune gridFunction
-
-    f = np.zeros((Nx_eval, Nv_eval))
+    f = np.zeros((params.Nx_eval, params.Nv_eval))
     a = FieldVector([0,0])
     for i, x in enumerate(x_vals):
-        a[0]=x
         for j, v in enumerate(v_vals):
+            a[0]=x
             a[1]=v
-            f[i,j] = fini(a)
+            f[i,j] = params.fini(a)
 
     return f
 
 def compute_density(fs, dv):
     return np.sum(fs * dv, axis=1)
 
-def vPoisson(fs, grids, charge):
+def vPoisson(params, fs, charge):
     """
     Solve 1D Poisson equation for the electric field given the distribution function.
 
@@ -44,15 +38,13 @@ def vPoisson(fs, grids, charge):
     Efield : ndarray, shape (Nx,)
         Electric field at each spatial point
     """
-    Ns = len(grids)
-    rho = np.zeros(grids[0].Nx)
+    rho = np.zeros(params.Nx_eval)
     
     # Compute total charge density
-    for s in range(Ns):
-        rho += charge[s] * compute_density(fs[:, :, s], grids[s].dv)
+    rho += charge * compute_density(fs, params.dv)
     
-    kx = grids[0].kx
-    K2 = np.copy(grids[0].kx2)
+    kx = params.kx
+    K2 = np.copy(params.kx2)
     
     # Solve Poisson in Fourier space
     b = np.fft.fft(1-rho)

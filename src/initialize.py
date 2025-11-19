@@ -1,6 +1,7 @@
 from .data import DataStorage
 import numpy as np
 from .grid import make_periodic_grid, Grid
+from .fields import eval_f
 
 def initialize_simulation(params):
     """
@@ -11,41 +12,27 @@ def initialize_simulation(params):
     """
     data = DataStorage()
     
-    for s in range(params.Ns):
-        # use Nx and Nv if defined
-        N = [params.Nx, params.Nv]
+    # use Nx and Nv if defined
+    N = [params.Nx, params.Nv]
 
-        # Create sample and map grids
-        grid = make_periodic_grid(params.Lx, params.Lv, N[0], N[1])
+    # Create sample and map grids
+    grid = make_periodic_grid(params.Lx, params.Lv, N[0], N[1])
 
-        # Create Grid dataclass instance
-        grid_obj = Grid(
-            x=grid.x,
-            v=grid.v,
-            X=grid.X,
-            V=grid.V,
-            Xsample_grid=grid.X,
-            Vsample_grid=grid.V,
-            dx=grid.dx,
-            dv=grid.dv,
-            Lx=grid.Lx,
-            Lv=grid.Lv,
-            Nx=grid.Nx,
-            Nv=grid.Nv,
-            kx=grid.kx,
-            kx2=grid.kx2,
-        )
-        params.grids.append(grid_obj)
+    # Create Grid dataclass instance
+    grid_obj = Grid(
+        dv=grid.dv,
+        Lx=grid.Lx,
+        Lv=grid.Lv,
+        Nx=grid.Nx,
+        Nv=grid.Nv,
+    )
+    params.grids.append(grid_obj)
 
     # Ensure Nt_max fits t_end
     if params.Nt_max > params.t_end / params.dt:
         params.Nt_max = int(np.ceil(params.t_end / params.dt))
+    
+    
+    f = eval_f(params, params.x_sampling_grid, params.v_sampling_grid)
 
-    # Initialize distribution functions
-    fs = np.zeros((N[0], N[1], params.Ns))
-
-    for s in range(params.Ns):
-        fini_func = params.fini[s]
-        fs[:, :, s] = fini_func(params.grids[s].Xsample_grid, params.grids[s].Vsample_grid)
-
-    return params, fs, data
+    return params, f, data

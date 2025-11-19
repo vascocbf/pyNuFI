@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from src import Config1D, \
                 initialize_simulation, \
                 vPoisson, \
@@ -9,8 +10,8 @@ from src import Config1D, \
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
-    Nx = 2**6,                    # num. of grid points
-    Nv = 2**6,                    # num. of grid points
+    Nx = 2**8,                    # num. of grid points
+    Nv = 2**8,                    # num. of grid points
     Nx_eval = 2**10,              # num. of points when evaluating distribution
     Nv_eval = 2**10,              # num. of points when evaluating distribution
     Mass=[1],                     # species mass
@@ -26,42 +27,59 @@ Nufi_params = Config1D(
     eps=1e-2,                     # perturbation amplitude
     v0=3,                         # electron drift velocity
     gridView = None,              # Dune gridView (None => built from parameters)
-    expression_ini = None
+    expression_ini = None,
 )
 
 
-# Start grid and fs 
+# Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
  
 # Start data
-Nufi_data.Efield = vPoisson(Nufi_fs, Nufi_params.grids, Nufi_params.Charge)
-Nufi_data.Efield_list = np.zeros((Nufi_params.grids[0].Nx, Nufi_params.Nt_max+1))
+Nufi_data.Efield = vPoisson(Nufi_params, Nufi_fs, Nufi_params.Charge)
+Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max+1))
 Nufi_data.Efield_list[:,0] = Nufi_data.Efield
 Nufi_data.time = 0 
 Nufi_data.fs = Nufi_fs
 
+print(type(Nufi_fs))
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 8))
+
+ax = axes[0]
+im = ax.pcolormesh(Nufi_params.x_sampling_grid, Nufi_params.v_sampling_grid , Nufi_fs, shading='auto')
+ax.set_xlabel(r"$x$")
+ax.set_ylabel(r"$v$")
+fig.colorbar(im, ax=ax)
+
+ax = axes[1]
+Efield = Nufi_data.Efield
+ax.plot(Nufi_params.x_sampling_grid, Efield)
+ax.set_xlabel(r"$x$")
+ax.grid(True)
+
+plt.savefig("DUNENUFI.png")
 # Make initial plot 
-plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots",
-             savename="initial_plot", saving=True)
-# ---- Main loop ---- # 
-
-Nsamples = 0
-time = 0 
-framenr = 1
-for i in range(Nufi_params.Nt_max):
-    
-    Nufi_params.it = i
-    Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
-    
-    time += Nufi_params.dt
-    Nufi_params.time = time
-    Nufi_params.time_array.append(time)
-    print(f"sim time = {round(Nufi_params.time,3)}")
-
-    # Plot at frequency
-    if i % (Nufi_params.plot_freq) == 0:
-        plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots/frames", savename=f"{framenr}", saving=True)
-        framenr+=1
-
-# Plot Final results
-plot_results(Nufi_params, Nufi_data, Nufi_fs, savename="finalplot", saving=True)
+# plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots",
+#              savename="initial_plot", saving=True)
+# # ---- Main loop ---- # 
+#
+# Nsamples = 0
+# time = 0 
+# framenr = 1
+# for i in range(Nufi_params.Nt_max):
+#
+#     Nufi_params.it = i
+#     Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
+#
+#     time += Nufi_params.dt
+#     Nufi_params.time = time
+#     Nufi_params.time_array.append(time)
+#     print(f"sim time = {round(Nufi_params.time,3)}")
+#
+#     # Plot at frequency
+#     if i % (Nufi_params.plot_freq) == 0:
+#         plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots/frames", savename=f"{framenr}", saving=True)
+#         framenr+=1
+#
+# # Plot Final results
+# plot_results(Nufi_params, Nufi_data, Nufi_fs, savename="finalplot", saving=True)
