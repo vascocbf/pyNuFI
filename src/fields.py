@@ -1,4 +1,27 @@
 import numpy as np
+from dune.common import FieldVector
+
+def eval_f(params):
+    """
+    Given a gridFunction, return evaluation of f on spline
+    return np.array with shape (Nx_eval, Nv_eval)
+    """
+    Nx_eval = params.Nx_eval
+    Nv_eval = params.Nv_eval
+
+    x_vals = np.linspace(0, params.Lx, num=Nx_eval)
+    v_vals = np.linspace(-params.Lv, params.Lv, num=Nv_eval)
+    fini = params.fini # a Dune gridFunction
+
+    f = np.zeros((Nx_eval, Nv_eval))
+    a = FieldVector([0,0])
+    for i, x in enumerate(x_vals):
+        a[0]=x
+        for j, v in enumerate(v_vals):
+            a[1]=v
+            f[i,j] = fini(a)
+
+    return f
 
 def compute_density(fs, dv):
     return np.sum(fs * dv, axis=1)

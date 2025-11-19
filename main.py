@@ -9,20 +9,24 @@ from src import Config1D, \
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
-    Nx=2**6,                      # optional, can leave as None
-    Nv=2**6,                      # optional, can leave as None
+    Nx = 2**6,                    # num. of grid points
+    Nv = 2**6,                    # num. of grid points
+    Nx_eval = 2**10,              # num. of points when evaluating distribution
+    Nv_eval = 2**10,              # num. of points when evaluating distribution
     Mass=[1],                     # species mass
     Charge=[-1],                  # species charge
     Ns=1,                         # number of species
     S_name="two_stream",          # simulation case name
-    Nt_max=4000,                  # maximum number of time steps
+    Nt_max=None,                  # maximum number of time steps (None => t_end/dt)
     dt=1/10,                      # time step size
     t_end=30,                     # end time of simulation
-    plot_freq=5,                 # iterations between plotting
+    plot_freq=5,                  # iterations between plotting
     measure_freq=1,               # iterations between measurements
     k=0.5,                        # wave number
     eps=1e-2,                     # perturbation amplitude
-    v0=3                          # electron drift velocity
+    v0=3,                         # electron drift velocity
+    gridView = None,              # Dune gridView (None => built from parameters)
+    expression_ini = None
 )
 
 

@@ -42,18 +42,10 @@ def initialize_simulation(params):
         params.Nt_max = int(np.ceil(params.t_end / params.dt))
 
     # Initialize distribution functions
-    Nx = params.grids[0].Xsample_grid.shape[0]
-    Nv = params.grids[0].Vsample_grid.shape[0]
-    fs = np.zeros((Nx, Nv, params.Ns))
+    fs = np.zeros((N[0], N[1], params.Ns))
 
     for s in range(params.Ns):
         fini_func = params.fini[s]
         fs[:, :, s] = fini_func(params.grids[s].Xsample_grid, params.grids[s].Vsample_grid)
-
-    # Default plotting and measurement frequencies
-    if not hasattr(params, "plot_freq") or params.plot_freq == 0:
-        params.plot_freq = params.Nt_max
-    if not hasattr(params, "measure_freq") or params.measure_freq == 0:
-        params.measure_freq = params.Nt_max
 
     return params, fs, data

@@ -1,5 +1,8 @@
 import numpy as np
 from dataclasses import dataclass
+from dune.fem.function import gridFunction
+from dune.grid import structuredGrid
+from math import pi, cos, exp, sqrt
 
 @dataclass
 class Config1D:
@@ -11,16 +14,16 @@ class Config1D:
     #grid settings
     Nx: int = None
     Nv: int = None
+    Nx_eval: int = None
+    Nv_eval: int = None
     Mass: list = None
     Charge: list = None
     Ns: int =  1 # num of species
     S_name: str = "electrons"
-    Nt_max: int  = 2000
+    Nt_max: int  = None  # None => t_end/dt
     
     #spline settings
     order: int = 3 # spline order
-    use_mex: bool = False 
-    scheme: str = "lagrange-bary"
     
     #sim settings
     dt: float = 0.1 # time step
@@ -34,6 +37,8 @@ class Config1D:
     v0: float = 3 # electron drift velocity
 
     grids: list = None
+    
+
 
     it: int = None # simulation iteration tic
     time: float = 0
@@ -49,17 +54,14 @@ class Config1D:
     #        * (np.exp(-(v-self.v0)**2/2)+ np.exp(-(v+self.v0)**2/2))
     #    )
 
-    def f0(self, x,v):     #Math version
-        return (
-            (1+self.eps * np.cos(self.k * x)) * v**2
-            / (np.sqrt(2 * np.pi))
-            * np.exp(-v**2/2)
-        )
+    # Dune objects, definition at __post_init__
+    gridView = None
+    expression_ini = None
+    fini = None 
         
     def __post_init__(self):
         self.Lx = 2*np.pi/self.k # spatial domain length
         self.Lv = 2*np.pi # velocity domain length
-        self.fini = [self.f0]
 
         if self.grids is None:
             self.grids = []
@@ -70,3 +72,12 @@ class Config1D:
             self.Charge = [-1]
         if self.time_array is None:
             self.time_array = []
+        if self.Nt_max is None:
+            self.Nt_max = int(self.t_end/self.dt)+1
+        if self.gridView is None:
+            self.gridView = structuredGrid([0,-self.Lv], [self.Lx,self.Lv], [self.Nx-1, self.Nv-1])
+        if self.expression_ini is None:
+            self.expression_ini = lambda x: (1+self.eps * cos(self.k * x[0])) * x[1]**2 / (sqrt(2 * pi))* exp(-x[1]**2/2)
+        
+        # a dune.fem gridFunction
+        self.fini = gridFunction(self.expression_ini, gridView=self.gridView, name='fini', order=self.order)
