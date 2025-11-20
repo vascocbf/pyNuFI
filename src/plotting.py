@@ -10,11 +10,11 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     axes = axes.flatten()
 
+    X = params.x_sampling_grid
+    V = params.v_sampling_grid
     # === Plot 1: distribution function ===
     ax = axes[0]
-    X = params.grids[0].Xsample_grid
-    V = params.grids[0].Vsample_grid
-    im = ax.pcolormesh(X, V, fs[:, :, 0], shading='auto')
+    im = ax.pcolormesh(X, V, fs.T, shading='auto')
     ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$v$")
@@ -22,20 +22,17 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
 
     # === Plot 2: electric field ===
     ax = axes[1]
-    x = params.grids[0].x
     Efield = data.Efield
     time=round(params.time,2)
-    ax.plot(x, Efield)
-    ax.set_xlim([x[0], x[-1]])
+    ax.plot(X, Efield)
     ax.set_title(r"$E$" + f" at t = {time}")
     ax.set_xlabel(r"$x$")
     ax.grid(True)
 
     # === Plot 3: 1 - density ===
     ax = axes[2]
-    density = compute_density(fs, params.grids[0].dv)
-    ax.plot(x, 1 - density)
-    ax.set_xlim([x[0], x[-1]])
+    density = compute_density(fs, params.dv)
+    ax.plot(X, 1 - density)
     ax.set_title(r"$1 - \rho$"+ f" at t = {time}")
     ax.set_xlabel(r"$x$")
     ax.grid(True)

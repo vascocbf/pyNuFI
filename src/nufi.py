@@ -1,4 +1,4 @@
-from .fields import vPoisson
+from .fields import vPoisson, eval_f
 from scipy.interpolate import CubicSpline 
 import numpy as np
         
@@ -26,8 +26,8 @@ def NuFi(params, data, fs):
         X, V = sympl_flow_Half(
             n=iT,
             dt=dt,
-            X=grid.X,
-            V=grid.V,
+            X=params.x_sampling_grid,
+            V=params.v_sampling_grid,
             Efield_list=data.Efield_list,
             grid=grid,
             params=params,
@@ -36,12 +36,11 @@ def NuFi(params, data, fs):
         )
 
         # Update distribution function
-        fini = params.fini[s]
-        fs[:, :, s] = fini(X, V)
+        fs = eval_f(params, X, V)
 
 
     # Compute electric field
-    Efield = vPoisson(fs, params.grids, params.Charge)
+    Efield = vPoisson(params, fs, params.Charge[0])
     # Add external field
     #Efield += compute_external_Efield(params, params.grids[0].x, params.time + dt)
 
@@ -80,19 +79,19 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
     # Acceleration field (velocity update from electric field)
     def Uv(X_, E):
     # Interpolate E(x) onto the X_ grid; returns shape like X_
-        return interp1d_periodic(X_, params.grids[0].x, E)
+        return interp1d_periodic(X_, params.x_sampling_grid, E)
 
     # Full steps if n > 2
     if n > 1:
         for i in range(n - 1):
             X = X - dt * Ux(X, V)
-            X = wrap_periodic(X, params.grids[0].x)
+            X = wrap_periodic(X, params.x_sampling_grid)
             # Use the corresponding past Efield if needed; here we just use current
             V = V + dt * Uv(X, Efield_list_normed[:, n - i])
 
     # Final half step
     X = X - dt * Ux(X, V)
-    X = wrap_periodic(X, params.grids[0].x)   # <-- add this line
+    X = wrap_periodic(X, params.x_sampling_grid)   # <-- add this line
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     return X, V
@@ -106,11 +105,10 @@ def wrap_periodic(X, xgrid):
 def interp1d_periodic(xq, xgrid, Fgrid):
     """
     Periodic cubic interpolation of Fgrid(xgrid) evaluated at xq.
-    - xgrid: shape (Nx,), strictly periodic (no duplicated endpoint).
-    - Fgrid: shape (Nx,)
+    - xgrid: shape (Nx_sample,), strictly periodic (no duplicated endpoint).
+    - Fgrid: shape (Nx_sample,)
     - xq   : any shape (...), returns same shape as xq
     """
-    xgrid = np.asarray(xgrid)
     Fgrid = np.asarray(Fgrid)
     xq    = np.asarray(xq)
 

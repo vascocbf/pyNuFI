@@ -45,16 +45,6 @@ class Config1D:
     time: float = 0
     time_array: list = None
 
-    #def f0(self, x, v):     #Physics version
-    #    """
-    #    clac. distribution
-    #    """
-    #    return (
-    #        (1+self.eps * np.cos(self.k * x))
-    #        / (2*np.sqrt(2 * np.pi))
-    #        * (np.exp(-(v-self.v0)**2/2)+ np.exp(-(v+self.v0)**2/2))
-    #    )
-
     # Dune objects, definition at __post_init__
     gridView: Any = None
     expression_ini: Any = None
