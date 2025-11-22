@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from dune.fem.function import gridFunction
 from dune.grid import structuredGrid
 from math import pi, cos, exp, sqrt
-from typing import Any
+from typing import Any, Optional 
 
 @dataclass
 class Config1D:
@@ -13,15 +13,15 @@ class Config1D:
 
     """
     #grid settings
-    Nx: int = None
-    Nv: int = None
-    Nx_eval: int = None
-    Nv_eval: int = None
-    Mass: list = None
-    Charge: list = None
+    Nx: int = 2**6
+    Nv: int = 2**6
+    Nx_eval: int = 2**6
+    Nv_eval: int = 2**6
+    Mass: list = [1]
+    Charge: list = [-1]
     Ns: int =  1 # num of species
     S_name: str = "electrons"
-    Nt_max: int  = None  # None => t_end/dt
+    Nt_max: Optional[int] = None # None => t_end/dt
     
     #spline settings
     order: int = 3 # spline order
@@ -37,21 +37,21 @@ class Config1D:
     
     v0: float = 3 # electron drift velocity
 
-    grids: list = None
+    grids: Optional[list] = None
     
 
 
-    it: int = None # simulation iteration tic
+    it: int = 0# simulation iteration tic
     time: float = 0
-    time_array: list = None
+    time_array: list = []
 
     # Dune objects, definition at __post_init__
     gridView: Any = None
     expression_ini: Any = None
     fini: Any = None
         
-    x_sampling_grid: np.ndarray = None
-    v_sampling_grid: np.ndarray = None
+    x_sampling_grid: Optional[np.ndarray] = None
+    v_sampling_grid: Optional[np.ndarray] = None
 
     def __post_init__(self):
         self.Lx = 2*np.pi/self.k # spatial domain length
@@ -74,7 +74,7 @@ class Config1D:
             self.expression_ini = lambda x: (1+self.eps * cos(self.k * x[0])) * x[1]**2 / (sqrt(2 * pi))* exp(-x[1]**2/2)
         
         # a dune.fem gridFunction
-        self.fini = gridFunction(self.expression_ini, gridView=self.gridView, name='fini', order=self.order)
+        self.fini = gridFunction(self.expression_ini, gridView=self.gridView, name='fini', order=self.order, )
         self.dv = self.Lv/self.Nv_eval
         
         # Fourier wavenumbers

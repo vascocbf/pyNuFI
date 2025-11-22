@@ -11,8 +11,8 @@ Nufi_data = None
 Nufi_params = Config1D(
     Nx = 2**6,                    # num. of grid points
     Nv = 2**6,                    # num. of grid points
-    Nx_eval = 2**6,              # num. of points when evaluating distribution
-    Nv_eval = 2**6,              # num. of points when evaluating distribution
+    Nx_eval = 2**6,               # num. of points when evaluating distribution
+    Nv_eval = 2**6,               # num. of points when evaluating distribution
     Mass=[1],                     # species mass
     Charge=[-1],                  # species charge
     Ns=1,                         # number of species
@@ -30,7 +30,6 @@ Nufi_params = Config1D(
     time=0
 )
 
-
 # Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
  
@@ -38,7 +37,6 @@ Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
 Nufi_data.Efield = vPoisson(Nufi_params, Nufi_fs, Nufi_params.Charge[0])
 Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max+1))
 Nufi_data.Efield_list[:,0] = Nufi_data.Efield
-Nufi_data.time = 0 
 Nufi_data.fs = Nufi_fs
 
 print(type(Nufi_fs))
