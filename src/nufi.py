@@ -1,16 +1,16 @@
 from .fields import vPoisson, eval_f
-from scipy.interpolate import CubicSpline 
+from scipy.interpolate import CubicSpline
 import numpy as np
-        
+
 
 def NuFi(params, data, fs):
     """
     Single NuFi time step update for all species.
-    
+
     Inputs:
         params - configuration object containing grids, charges, masses, etc.
         fs     - distribution function array (Nx x Nv x Ns)
-        
+
     Returns:
         fs     - updated distribution function
         params - updated parameters (Efield, Efield_list)
@@ -32,17 +32,16 @@ def NuFi(params, data, fs):
             grid=grid,
             params=params,
             charge=charge_s,
-            mass=mass_s
+            mass=mass_s,
         )
 
         # Update distribution function
         fs = eval_f(params, X, V)
 
-
     # Compute electric field
     Efield = vPoisson(params, fs, params.Charge[0])
     # Add external field
-    #Efield += compute_external_Efield(params, params.grids[0].x, params.time + dt)
+    # Efield += compute_external_Efield(params, params.grids[0].x, params.time + dt)
 
     # Update parameters
     data.Efield = Efield
@@ -54,7 +53,7 @@ def NuFi(params, data, fs):
 def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
     """
     Symplectic flow for half time step in NuFi method.
-    
+
     Inputs:
         n      : step number
         dt     : time step
@@ -67,8 +66,8 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
     Outputs:
         X, V   : updated position and velocity arrays
     """
-    
-    Efield_list_normed = Efield_list * (charge/mass)
+
+    Efield_list_normed = Efield_list * (charge / mass)
     if n == 0:
         return X, V
 
@@ -78,7 +77,7 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
 
     # Acceleration field (velocity update from electric field)
     def Uv(X_, E):
-    # Interpolate E(x) onto the X_ grid; returns shape like X_
+        # Interpolate E(x) onto the X_ grid; returns shape like X_
         return interp1d_periodic(X_, params.x_sampling_grid, E)
 
     # Full steps if n > 2
@@ -91,16 +90,18 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
 
     # Final half step
     X = X - dt * Ux(X, V)
-    X = wrap_periodic(X, params.x_sampling_grid)   # <-- add this line
+    X = wrap_periodic(X, params.x_sampling_grid)  # <-- add this line
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     return X, V
 
+
 def wrap_periodic(X, xgrid):
     dx = xgrid[1] - xgrid[0]
-    L  = dx * len(xgrid)
+    L = dx * len(xgrid)
     x0 = xgrid[0]
     return (X - x0) % L + x0
+
 
 def interp1d_periodic(xq, xgrid, Fgrid):
     """
@@ -110,10 +111,10 @@ def interp1d_periodic(xq, xgrid, Fgrid):
     - xq   : any shape (...), returns same shape as xq
     """
     Fgrid = np.asarray(Fgrid)
-    xq    = np.asarray(xq)
+    xq = np.asarray(xq)
 
     dx = xgrid[1] - xgrid[0]
-    L  = dx * len(xgrid)
+    L = dx * len(xgrid)
     x0 = xgrid[0]
 
     # wrap queries into [x0, x0+L)
@@ -123,9 +124,10 @@ def interp1d_periodic(xq, xgrid, Fgrid):
     x_ext = np.concatenate([xgrid, [x0 + L]])
     F_ext = np.concatenate([Fgrid, [Fgrid[0]]])
 
-    spline = CubicSpline(x_ext, F_ext, bc_type='periodic')
-    Fq = spline(xq_mod)            # vectorized; same shape as xq
+    spline = CubicSpline(x_ext, F_ext, bc_type="periodic")
+    Fq = spline(xq_mod)  # vectorized; same shape as xq
     return Fq
+
 
 def step(params, data, fs):
     """
@@ -133,6 +135,6 @@ def step(params, data, fs):
     """
 
     params, data, fs = NuFi(params, data, fs)
-    data.Efield_list[:,params.it] = data.Efield
+    data.Efield_list[:, params.it] = data.Efield
 
     return params, data, fs

@@ -3,6 +3,7 @@ from dune.grid import structuredGrid
 from typing import Any
 # ------- Grid Class ------- #
 
+
 @dataclass
 class Grid:
     # spacing
@@ -21,15 +22,15 @@ class Grid:
     # Dune grid, a structuredGrid object
     gridView: Any = None
 
+
 # ------- Grid funcs ------- #
 def make_periodic_grid(Lx, Lv, Nx, Nv):
     # 1D grids
-    dv = Lv/Nv
-    
+    dv = Lv / Nv
+
     # Dune gridView
-    gridView = structuredGrid([0,-Lv], [Lx,Lv], [Nx-1,Nv-1])
-    
-   
+    gridView = structuredGrid([0, -Lv], [Lx, Lv], [Nx - 1, Nv - 1])
+
     grid = Grid(
         dv=dv,
         Lx=Lx,

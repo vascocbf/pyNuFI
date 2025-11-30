@@ -14,7 +14,7 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     V = params.v_sampling_grid
     # === Plot 1: distribution function ===
     ax = axes[0]
-    im = ax.pcolormesh(X, V, fs.T, shading='auto')
+    im = ax.pcolormesh(X, V, fs.T, shading="auto")
     ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$v$")
@@ -23,7 +23,7 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     # === Plot 2: electric field ===
     ax = axes[1]
     Efield = data.Efield
-    time=round(params.time,2)
+    time = round(params.time, 2)
     ax.plot(X, Efield)
     ax.set_title(r"$E$" + f" at t = {time}")
     ax.set_xlabel(r"$x$")
@@ -33,14 +33,14 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     ax = axes[2]
     density = compute_density(fs, params.dv)
     ax.plot(X, 1 - density)
-    ax.set_title(r"$1 - \rho$"+ f" at t = {time}")
+    ax.set_title(r"$1 - \rho$" + f" at t = {time}")
     ax.set_xlabel(r"$x$")
     ax.grid(True)
 
     # === Plot 4: field energy evolution ===
     ax = axes[3]
     maxE = 0.5 * np.sum(data.Efield_list**2, axis=0)
-    ts = np.arange(len(maxE)) * params.dt 
+    ts = np.arange(len(maxE)) * params.dt
     ax.semilogy(ts, maxE)
     ax.set_title(r"$\frac{1}{2}\sum_x E^2$ vs time")
     ax.set_xlabel(r"$t$")
@@ -48,8 +48,8 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     ax.grid(True)
 
     plt.tight_layout()
-#   plt.pause(0.01)
-#    plt.show()
+    #   plt.pause(0.01)
+    #    plt.show()
     if saving:
         plt.savefig(f"./{savedir}/{savename}.png")
     plt.close(fig)

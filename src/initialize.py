@@ -3,15 +3,16 @@ import numpy as np
 from .grid import make_periodic_grid, Grid
 from .fields import eval_f
 
+
 def initialize_simulation(params):
     """
     Initialize:
-    grids, 
+    grids,
     distribution functions,
     and storage arrays.
     """
     data = DataStorage()
-    
+
     # use Nx and Nv if defined
     N = [params.Nx, params.Nv]
 
@@ -31,8 +32,7 @@ def initialize_simulation(params):
     # Ensure Nt_max fits t_end
     if params.Nt_max > params.t_end / params.dt:
         params.Nt_max = int(np.ceil(params.t_end / params.dt))
-    
-    
+
     f = eval_f(params, params.x_sampling_grid, params.v_sampling_grid)
 
     return params, f, data

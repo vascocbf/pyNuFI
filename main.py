@@ -1,68 +1,76 @@
 import numpy as np
-from src import Config1D, \
-                initialize_simulation, \
-                vPoisson, \
-                plot_results, \
-                step
+from src import Config1D, initialize_simulation, vPoisson, plot_results, step
 
 
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
-    Nx = 2**6,                    # num. of grid points
-    Nv = 2**6,                    # num. of grid points
-    Nx_eval = 2**6,               # num. of points when evaluating distribution
-    Nv_eval = 2**6,               # num. of points when evaluating distribution
-    Mass=[1],                     # species mass
-    Charge=[-1],                  # species charge
-    Ns=1,                         # number of species
-    S_name="two_stream",          # simulation case name
-    Nt_max=None,                  # maximum number of time steps (None => t_end/dt)
-    dt=1/10,                      # time step size
-    t_end=30,                     # end time of simulation
-    plot_freq=5,                  # iterations between plotting
-    measure_freq=1,               # iterations between measurements
-    k=0.5,                        # wave number
-    eps=1e-3,                     # perturbation amplitude
-    v0=3,                         # electron drift velocity
-    gridView = None,              # Dune gridView (None => built from parameters)
-    expression_ini = None,
-    time=0
+    Nx=2**6,  # num. of grid points
+    Nv=2**6,  # num. of grid points
+    Nx_eval=2**6,  # num. of points when evaluating distribution
+    Nv_eval=2**6,  # num. of points when evaluating distribution
+    Mass=[1],  # species mass
+    Charge=[-1],  # species charge
+    Ns=1,  # number of species
+    S_name="two_stream",  # simulation case name
+    Nt_max=None,  # maximum number of time steps (None => t_end/dt)
+    dt=1 / 10,  # time step size
+    t_end=30,  # end time of simulation
+    plot_freq=5,  # iterations between plotting
+    measure_freq=1,  # iterations between measurements
+    k=0.5,  # wave number
+    eps=1e-3,  # perturbation amplitude
+    v0=3,  # electron drift velocity
+    gridView=None,  # Dune gridView (None => built from parameters)
+    expression_ini=None,
+    time=0,
 )
 
 # Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
- 
+
 # Start data
 Nufi_data.Efield = vPoisson(Nufi_params, Nufi_fs, Nufi_params.Charge[0])
-Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max+1))
-Nufi_data.Efield_list[:,0] = Nufi_data.Efield
+Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max + 1))
+Nufi_data.Efield_list[:, 0] = Nufi_data.Efield
 Nufi_data.fs = Nufi_fs
 
 print(type(Nufi_fs))
 
-# Make initial plot 
-plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots",
-              savename="initial_plot", saving=True)
-# # ---- Main loop ---- # 
+# Make initial plot
+plot_results(
+    Nufi_params,
+    Nufi_data,
+    Nufi_fs,
+    savedir="plots",
+    savename="initial_plot",
+    saving=True,
+)
+# # ---- Main loop ---- #
 
 Nsamples = 0
-time = 0 
+time = 0
 framenr = 1
 for i in range(Nufi_params.Nt_max):
-
     Nufi_params.it = i
     Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
 
     time += Nufi_params.dt
     Nufi_params.time = time
     Nufi_params.time_array.append(time)
-    print(f"sim time = {round(Nufi_params.time,3)}")
+    print(f"sim time = {round(Nufi_params.time, 3)}")
 
     # Plot at frequency
     if i % (Nufi_params.plot_freq) == 0:
-        plot_results(Nufi_params, Nufi_data, Nufi_fs, savedir="plots/frames", savename=f"{framenr}", saving=True)
-        framenr+=1
+        plot_results(
+            Nufi_params,
+            Nufi_data,
+            Nufi_fs,
+            savedir="plots/frames",
+            savename=f"{framenr}",
+            saving=True,
+        )
+        framenr += 1
 
 # Plot Final results
 plot_results(Nufi_params, Nufi_data, Nufi_fs, savename="finalplot", saving=True)
