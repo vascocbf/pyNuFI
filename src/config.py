@@ -109,6 +109,8 @@ class Config1D:
         self.kx2[0] = 1.0
 
         if self.x_sampling_grid is None:
-            self.x_sampling_grid = np.linspace(0, self.Lx, num=self.Nx_eval)
+            self.x_sampling_grid = np.linspace(start=0, stop=self.Lx, num=self.Nx_eval)
         if self.v_sampling_grid is None:
-            self.v_sampling_grid = np.linspace(-self.Lv, self.Lv, num=self.Nv_eval)
+            self.v_sampling_grid = np.linspace(
+                start=-self.Lv, stop=self.Lv, num=self.Nv_eval
+            )

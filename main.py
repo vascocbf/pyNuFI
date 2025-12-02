@@ -35,8 +35,6 @@ Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max + 1))
 Nufi_data.Efield_list[:, 0] = Nufi_data.Efield
 Nufi_data.fs = Nufi_fs
 
-print(type(Nufi_fs))
-
 # Make initial plot
 plot_results(
     Nufi_params,

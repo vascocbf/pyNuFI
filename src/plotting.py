@@ -31,7 +31,7 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
 
     # === Plot 3: 1 - density ===
     ax = axes[2]
-    density = compute_density(fs, params.dv)
+    density = compute_density(fs, V)
     ax.plot(X, 1 - density)
     ax.set_title(r"$1 - \rho$" + f" at t = {time}")
     ax.set_xlabel(r"$x$")

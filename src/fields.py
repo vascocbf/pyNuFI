@@ -9,18 +9,19 @@ def eval_f(params, x_vals, v_vals):
     return type np.array with shape (Nx_eval, Nv_eval)
     """
     f = np.zeros((params.Nx_eval, params.Nv_eval))
-    x0 = params.x_sampling_grid[0]
-    v0 = params.v_sampling_grid[0]
     a = FieldVector([0, 0])
     for i, x in enumerate(x_vals):
         for j, v in enumerate(v_vals):
-            a[0] = (x - x0) % params.Lx + x0
-            a[1] = (v - v0) % params.Lv + v0
+            a[0] = wrap_periodic(x, x_vals)
+            a[1] = wrap_periodic(v, v_vals)
+            # a[0] = (x - x0) % params.Lx + x0
+            # a[1] = (v - v0) % params.Lv + v0
             f[i, j] = params.fini(a)
     return f
 
 
-def compute_density(fs, dv):
+def compute_density(fs, v_vals):
+    dv = abs(v_vals[1] - v_vals[0])
     return np.sum(fs * dv, axis=1)
 
 
@@ -45,7 +46,7 @@ def vPoisson(params, fs, charge):
     rho = np.zeros(params.Nx_eval)
 
     # Compute total charge density
-    rho += charge * compute_density(fs, params.dv)
+    rho += charge * compute_density(fs, params.v_sampling_grid)
 
     kx = params.kx
     K2 = np.copy(params.kx2)
@@ -60,3 +61,10 @@ def vPoisson(params, fs, charge):
     Efield = -np.real(np.fft.ifft(dphi_dx_h))  # 1D field
 
     return Efield
+
+
+def wrap_periodic(X, xgrid):
+    dx = xgrid[1] - xgrid[0]
+    L = dx * len(xgrid)
+    x0 = xgrid[0]
+    return (X - x0) % L + x0

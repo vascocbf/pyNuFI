@@ -1,4 +1,4 @@
-from .fields import vPoisson, eval_f
+from .fields import vPoisson, eval_f, wrap_periodic
 from scipy.interpolate import CubicSpline
 import numpy as np
 
@@ -94,13 +94,6 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     return X, V
-
-
-def wrap_periodic(X, xgrid):
-    dx = xgrid[1] - xgrid[0]
-    L = dx * len(xgrid)
-    x0 = xgrid[0]
-    return (X - x0) % L + x0
 
 
 def interp1d_periodic(xq, xgrid, Fgrid):
