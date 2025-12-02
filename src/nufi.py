@@ -1,4 +1,4 @@
-from .fields import vPoisson, eval_f, wrap_periodic
+from .fields import vPoisson, eval_f, wrap_periodic, E_spline
 from scipy.interpolate import CubicSpline
 import numpy as np
 
@@ -20,7 +20,6 @@ def NuFi(params, data, fs):
     Ns = params.Ns
 
     for s in range(Ns):
-        grid = params.grids[s]
         charge_s = params.Charge[s]
         mass_s = params.Mass[s]
         X, V = sympl_flow_Half(
@@ -29,7 +28,6 @@ def NuFi(params, data, fs):
             X=params.x_sampling_grid,
             V=params.v_sampling_grid,
             Efield_list=data.Efield_list,
-            grid=grid,
             params=params,
             charge=charge_s,
             mass=mass_s,
@@ -50,7 +48,7 @@ def NuFi(params, data, fs):
     return params, data, fs
 
 
-def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
+def sympl_flow_Half(n, dt, X, V, Efield_list, params, charge, mass):
     """
     Symplectic flow for half time step in NuFi method.
 
@@ -78,7 +76,9 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
     # Acceleration field (velocity update from electric field)
     def Uv(X_, E):
         # Interpolate E(x) onto the X_ grid; returns shape like X_
-        return interp1d_periodic(X_, params.x_sampling_grid, E)
+        x_mod = wrap_periodic(X_, params.x_sampling_grid)
+        spline = E_spline(X_, E)
+        return spline(x_mod)
 
     # Full steps if n > 2
     if n > 1:
@@ -90,7 +90,7 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, grid, params, charge, mass):
 
     # Final half step
     X = X - dt * Ux(X, V)
-    X = wrap_periodic(X, params.x_sampling_grid)  # <-- add this line
+    X = wrap_periodic(X, params.x_sampling_grid)
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     return X, V
@@ -100,7 +100,7 @@ def interp1d_periodic(xq, xgrid, Fgrid):
     """
     Periodic cubic interpolation of Fgrid(xgrid) evaluated at xq.
     - xgrid: shape (Nx_sample,), strictly periodic (no duplicated endpoint).
-    - Fgrid: shape (Nx_sample,)
+    - Fgrid: shape (Nx_sample,), your E field (not the distribution)
     - xq   : any shape (...), returns same shape as xq
     """
     Fgrid = np.asarray(Fgrid)
@@ -111,7 +111,7 @@ def interp1d_periodic(xq, xgrid, Fgrid):
     x0 = xgrid[0]
 
     # wrap queries into [x0, x0+L)
-    xq_mod = (xq - x0) % L + x0
+    xq_mod = wrap_periodic(xq, xgrid)
 
     # append duplicate endpoint for the spline only
     x_ext = np.concatenate([xgrid, [x0 + L]])

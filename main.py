@@ -22,7 +22,7 @@ Nufi_params = Config1D(
     eps=1e-3,  # perturbation amplitude
     v0=3,  # electron drift velocity
     gridView=None,  # Dune gridView (None => built from parameters)
-    expression_ini=None,
+    f0=None,
     time=0,
 )
 
@@ -51,8 +51,9 @@ time = 0
 framenr = 1
 for i in range(Nufi_params.Nt_max):
     Nufi_params.it = i
+    print(f"in main loop, i={i}")
     Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
-
+    print("step called succesfully")
     time += Nufi_params.dt
     Nufi_params.time = time
     Nufi_params.time_array.append(time)

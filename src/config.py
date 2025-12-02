@@ -51,7 +51,7 @@ class Config1D:
     # Dune objects, definition at __post_init__
     gridDomain: Any = None
     gridView: Any = None
-    expression_ini: Any = None
+    f0: Any = None
     fini: Any = None
 
     x_sampling_grid: Optional[np.ndarray] = None
@@ -83,8 +83,8 @@ class Config1D:
             )
         if self.gridView is None:
             self.gridView = yaspGrid(self.gridDomain, dimgrid=2)
-        if self.expression_ini is None:
-            self.expression_ini = (
+        if self.f0 is None:
+            self.f0 = (
                 lambda x: (1 + self.eps * cos(self.k * x[0]))
                 * x[1] ** 2
                 / (sqrt(2 * pi))
@@ -93,7 +93,7 @@ class Config1D:
 
         # a dune.fem gridFunction
         self.fini = gridFunction(
-            self.expression_ini,
+            self.f0,
             gridView=self.gridView,
             name="fini",
             order=self.order,
