@@ -80,7 +80,6 @@ class Config1D:
                 [self.Lx, self.Lv],
                 [self.Nx - 1, self.Nv - 1],
                 periodic=[True, False],
-                overlap=2,
             )
         if self.gridView is None:
             self.gridView = yaspGrid(self.gridDomain, dimgrid=2)
