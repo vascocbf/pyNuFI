@@ -30,7 +30,7 @@ Nufi_params = Config1D(
 # Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
 
-diff_plots = True  # plot diff plots (True), or distribution f (False)
+diff_plots = False  # plot diff plots (True), or distribution f (False)
 # set type of plot to f_t-fini (False), or f_t(x)-1/sqrt(2pi)v^2exp(-v^2) (True)
 _1D_diff_plot = False
 

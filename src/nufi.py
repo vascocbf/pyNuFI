@@ -1,4 +1,5 @@
 from .fields import vPoisson, eval_f, wrap_periodic, E_spline
+import numpy as np
 
 
 def NuFi(params, data, fs):
@@ -66,8 +67,9 @@ def Half_flow(n, dt, X, V, Efield_list, params, charge, mass):
     def Uv(X_, E):
         # Interpolate E(x) onto the X_ grid; returns shape like X_
         # x_mod = wrap_periodic(X_, params.x_sampling_grid)
-        spline = E_spline(X_, params.x_sampling_grid, E)
-        return spline(X_)
+        dune_spline = E_spline(params, X_, params.x_sampling_grid, E)
+
+        return np.array([dune_spline([x]) for x in X_])
 
     # Full steps if n > 2
     if n > 1:

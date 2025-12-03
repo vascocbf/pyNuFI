@@ -1,5 +1,6 @@
 import numpy as np
 from dune.common import FieldVector
+import dune.functions
 from scipy.interpolate import CubicSpline
 
 
@@ -21,12 +22,13 @@ def eval_f(params, x_vals, v_vals):
     return f
 
 
-def E_spline(x, x_grid, y) -> CubicSpline:
+def E_spline(params, x, x_grid, y) -> CubicSpline:
     """
     periodic spline generator from points
     x, y: data points to build E_spline
     returns spline to be ealuated later
     """
+
     Fgrid = np.asarray(y)
     x = np.asarray(x)
 
@@ -37,8 +39,17 @@ def E_spline(x, x_grid, y) -> CubicSpline:
     # append duplicate endpoint for the spline only
     x_ext = np.concatenate([x_grid, [x0 + L]])
     F_ext = np.concatenate([Fgrid, [Fgrid[0]]])
-    spline = CubicSpline(x_ext, F_ext, bc_type="periodic")
-    return spline
+    basis = dune.functions.defaultGlobalBasis(
+        params.gridView, dune.functions.Lagrange(order=3)
+    )
+
+    coeffs = np.ndarray(len(basis))
+    basis.interpolate(
+        coeffs,
+        CubicSpline(x_ext, F_ext, bc_type="periodic"),
+    )
+
+    return basis.asFuntion(x_ext)
 
 
 def compute_density(fs, v_vals):
