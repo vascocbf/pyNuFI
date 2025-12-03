@@ -99,7 +99,7 @@ class Config1D:
             order=self.order,
         )
         self.dv = self.Lv / self.Nv_eval
-
+        self.dx = self.Lx / self.Nx_eval
         # Fourier wavenumbers
         self.kx = np.fft.fftshift(
             (2 * np.pi / self.Lx) * np.arange(-self.Nx_eval // 2, self.Nx_eval // 2)

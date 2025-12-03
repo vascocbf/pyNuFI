@@ -17,40 +17,26 @@ def eval_f(params, x_vals, v_vals):
         for j, v in enumerate(v_vals):
             a[0] = wrap_periodic(x, x_vals)
             a[1] = wrap_periodic(v, v_vals)
-            # a[0] = (x - x0) % params.Lx + x0
-            # a[1] = (v - v0) % params.Lv + v0
             f[i, j] = params.fini(a)
     return f
 
 
-def check_strict_inc(x):
-    diffs = np.diff(x)
-    mask = diffs <= 0  # problematic positions
-    if not np.any(mask):
-        print("OK: x is strictly increasing.")
-        return
-
-    bad_idxs = np.where(mask)[0]  # indices where increase fails
-    for i in bad_idxs:
-        print(f"Failure at index {i}: x[{i}] = {x[i]}, x[{i + 1}] = {x[i + 1]}")
-
-
-def E_spline(x, y) -> CubicSpline:
+def E_spline(x, x_grid, y) -> CubicSpline:
     """
     periodic spline generator from points
     x, y: data points to build E_spline
     returns spline to be ealuated later
     """
     Fgrid = np.asarray(y)
+    x = np.asarray(x)
 
-    dx = x[1] - x[0]
-    L = dx * len(x)
-    x0 = x[0]
+    dx = x_grid[1] - x_grid[0]
+    L = dx * len(x_grid)
+    x0 = x_grid[0]
 
     # append duplicate endpoint for the spline only
-    x_ext = np.concatenate([x, [x0 + L]])
+    x_ext = np.concatenate([x_grid, [x0 + L]])
     F_ext = np.concatenate([Fgrid, [Fgrid[0]]])
-    check_strict_inc(x_ext)
     spline = CubicSpline(x_ext, F_ext, bc_type="periodic")
     return spline
 
@@ -99,7 +85,7 @@ def vPoisson(params, fs, charge):
 
 
 def wrap_periodic(X, xgrid):
-    dx = abs(xgrid[1] - xgrid[0])
+    dx = xgrid[1] - xgrid[0]
     L = dx * len(xgrid)
     x0 = xgrid[0]
     return (X - x0) % L + x0

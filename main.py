@@ -5,8 +5,8 @@ from src import Config1D, initialize_simulation, vPoisson, plot_results, step
 Nufi_fs = None
 Nufi_data = None
 Nufi_params = Config1D(
-    Nx=2**6,  # num. of grid points
-    Nv=2**6,  # num. of grid points
+    Nx=2**4,  # num. of grid points
+    Nv=2**4,  # num. of grid points
     Nx_eval=2**6,  # num. of points when evaluating distribution
     Nv_eval=2**6,  # num. of points when evaluating distribution
     Mass=[1],  # species mass
@@ -16,7 +16,7 @@ Nufi_params = Config1D(
     Nt_max=None,  # maximum number of time steps (None => t_end/dt)
     dt=1 / 10,  # time step size
     t_end=30,  # end time of simulation
-    plot_freq=5,  # iterations between plotting
+    plot_freq=10,  # iterations between plotting
     measure_freq=1,  # iterations between measurements
     k=0.5,  # wave number
     eps=1e-3,  # perturbation amplitude
@@ -51,9 +51,9 @@ time = 0
 framenr = 1
 for i in range(Nufi_params.Nt_max):
     Nufi_params.it = i
-    print(f"in main loop, i={i}")
+    # print(f"in main loop, i={i}")
     Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
-    print("step called succesfully")
+    # print("step called succesfully")
     time += Nufi_params.dt
     Nufi_params.time = time
     Nufi_params.time_array.append(time)
