@@ -3,7 +3,9 @@ from .fields import compute_density
 import numpy as np
 
 
-def plot_results(params, data, fs, savedir="plots", savename="plot", saving=False):
+def plot_results(
+    params, data, fs, savedir="plots", savename="plot", saving=False, fini=None, ptype=0
+):
     """
     Plot the distribution function, electric field, density, and field energy evolution.
     """
@@ -14,11 +16,27 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     V = params.v_sampling_grid
     # === Plot 1: distribution function ===
     ax = axes[0]
-    im = ax.pcolormesh(X, V, fs.T, shading="auto")
-    ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$v$")
-    fig.colorbar(im, ax=ax)
+    if ptype == 0:
+        if fini is not None:
+            fs_plot = fs[1] - fini
+            im = ax.scatter(V, fs_plot)
+            ax.set_title("f_t - 1/sqrt(2pi) v_0^2 exp(-v_0^2)")
+        else:
+            im = ax.pcolormesh(X, V, fs.T, shading="auto")
+            ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
+            ax.set_xlabel(r"$x$")
+            ax.set_ylabel(r"$v$")
+            fig.colorbar(im, ax=ax)
+    elif ptype == 1:
+        if fini is not None:
+            fs_plot = fs - fini
+            im = ax.pcolormesh(X, V, fs_plot.T, shading="auto")
+        else:
+            im = ax.pcolormesh(X, V, fs.T, shading="auto")
+        ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
+        ax.set_xlabel(r"$x$")
+        ax.set_ylabel(r"$v$")
+        fig.colorbar(im, ax=ax)
 
     # === Plot 2: electric field ===
     ax = axes[1]
@@ -44,7 +62,7 @@ def plot_results(params, data, fs, savedir="plots", savename="plot", saving=Fals
     ax.semilogy(ts, maxE)
     ax.set_title(r"$\frac{1}{2}\sum_x E^2$ vs time")
     ax.set_xlabel(r"$t$")
-    ax.set_ylabel("Energy (log scale)")
+    ax.set_ylabel("E")
     ax.grid(True)
 
     plt.tight_layout()

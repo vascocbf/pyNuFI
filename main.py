@@ -1,4 +1,5 @@
 import numpy as np
+from numpy._core.multiarray import promote_types
 from src import Config1D, initialize_simulation, vPoisson, plot_results, step
 
 
@@ -29,6 +30,21 @@ Nufi_params = Config1D(
 # Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
 
+diff_plots = True  # plot diff plots (True), or distribution f (False)
+# set type of plot to f_t-fini (False), or f_t(x)-1/sqrt(2pi)v^2exp(-v^2) (True)
+_1D_diff_plot = False
+
+if diff_plots:
+    if _1D_diff_plot:
+        ptype = 0
+        finitial = np.array(
+            [Nufi_params.fini_v(i) for i in Nufi_params.v_sampling_grid]
+        )
+    else:
+        ptype = 1
+        finitial = Nufi_fs
+else:
+    finitial = None
 # Start data
 Nufi_data.Efield = vPoisson(Nufi_params, Nufi_fs, Nufi_params.Charge[0])
 Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max + 1))
@@ -43,6 +59,8 @@ plot_results(
     savedir="plots",
     savename="initial_plot",
     saving=True,
+    fini=finitial,
+    ptype=ptype,
 )
 # # ---- Main loop ---- #
 
@@ -68,6 +86,8 @@ for i in range(Nufi_params.Nt_max):
             savedir="plots/frames",
             savename=f"{framenr}",
             saving=True,
+            fini=finitial,
+            ptype=ptype,
         )
         framenr += 1
 

@@ -15,8 +15,8 @@ def eval_f(params, x_vals, v_vals):
     a = FieldVector([0, 0])
     for i, x in enumerate(x_vals):
         for j, v in enumerate(v_vals):
-            a[0] = wrap_periodic(x, x_vals)
-            a[1] = wrap_periodic(v, v_vals)
+            a[0] = x
+            a[1] = v
             f[i, j] = params.fini(a)
     return f
 
@@ -42,7 +42,7 @@ def E_spline(x, x_grid, y) -> CubicSpline:
 
 
 def compute_density(fs, v_vals):
-    dv = abs(v_vals[1] - v_vals[0])
+    dv = v_vals[1] - v_vals[0]
     return np.sum(fs * dv, axis=1)
 
 

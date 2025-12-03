@@ -1,6 +1,5 @@
 import numpy as np
 from dataclasses import dataclass
-from dune.fem.function import gridFunction
 from dune.grid import cartesianDomain, yaspGrid
 from math import pi, cos, exp, sqrt
 from typing import Any, Optional
@@ -92,9 +91,8 @@ class Config1D:
             )
 
         # a dune.fem gridFunction
-        self.fini = gridFunction(
+        self.fini = self.gridView.function(
             self.f0,
-            gridView=self.gridView,
             name="fini",
             order=self.order,
         )
@@ -113,3 +111,5 @@ class Config1D:
             self.v_sampling_grid = np.linspace(
                 start=-self.Lv, stop=self.Lv, num=self.Nv_eval
             )
+
+        self.fini_v = lambda v: 1 / sqrt(2 * pi) * v**2 * exp(-(v**2))

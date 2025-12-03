@@ -1,6 +1,4 @@
 from .fields import vPoisson, eval_f, wrap_periodic, E_spline
-from scipy.interpolate import CubicSpline
-import numpy as np
 
 
 def NuFi(params, data, fs):
@@ -17,27 +15,18 @@ def NuFi(params, data, fs):
     """
     iT = params.it + 1
     dt = params.dt
-    Ns = params.Ns
 
-    for s in range(Ns):
-        charge_s = params.Charge[s]
-        mass_s = params.Mass[s]
-        X, V = sympl_flow_Half(
-            n=iT,
-            dt=dt,
-            X=params.x_sampling_grid,
-            V=params.v_sampling_grid,
-            Efield_list=data.Efield_list,
-            params=params,
-            charge=charge_s,
-            mass=mass_s,
-        )
+    Efield, fs = Half_flow(
+        n=iT,
+        dt=dt,
+        X=params.x_sampling_grid,
+        V=params.v_sampling_grid,
+        Efield_list=data.Efield_list,
+        params=params,
+        charge=params.Charge[0],
+        mass=params.Mass[0],
+    )
 
-        # Update distribution function
-        fs = eval_f(params, X, V)
-
-    # Compute electric field
-    Efield = vPoisson(params, fs, params.Charge[0])
     # Add external field
     # Efield += compute_external_Efield(params, params.grids[0].x, params.time + dt)
 
@@ -48,7 +37,7 @@ def NuFi(params, data, fs):
     return params, data, fs
 
 
-def sympl_flow_Half(n, dt, X, V, Efield_list, params, charge, mass):
+def Half_flow(n, dt, X, V, Efield_list, params, charge, mass):
     """
     Symplectic flow for half time step in NuFi method.
 
@@ -62,7 +51,7 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, params, charge, mass):
         charge : particle charge
         mass   : particle mass
     Outputs:
-        X, V   : updated position and velocity arrays
+        E, f   : updated Efield and distribution
     """
 
     Efield_list_normed = Efield_list * (charge / mass)
@@ -93,7 +82,9 @@ def sympl_flow_Half(n, dt, X, V, Efield_list, params, charge, mass):
     X = wrap_periodic(X, params.x_sampling_grid)
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
-    return X, V
+    f_new = eval_f(params, X, V)
+    E_new = vPoisson(params, f_new, charge)
+    return E_new, f_new
 
 
 def step(params, data, fs):
