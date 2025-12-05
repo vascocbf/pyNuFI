@@ -1,5 +1,4 @@
 import numpy as np
-from numpy._core.multiarray import promote_types
 from src import Config1D, initialize_simulation, vPoisson, plot_results, step
 
 
@@ -30,9 +29,9 @@ Nufi_params = Config1D(
 # Start grid and fs (type(fs)=np.array)
 Nufi_params, Nufi_fs, Nufi_data = initialize_simulation(Nufi_params)
 
-diff_plots = False  # plot diff plots (True), or distribution f (False)
+diff_plots = True  # plot diff plots (True), or distribution f (False)
 # set type of plot to f_t-fini (False), or f_t(x)-1/sqrt(2pi)v^2exp(-v^2) (True)
-_1D_diff_plot = False
+_1D_diff_plot = True
 
 if diff_plots:
     if _1D_diff_plot:
@@ -45,6 +44,7 @@ if diff_plots:
         finitial = Nufi_fs
 else:
     finitial = None
+    ptype = 0
 # Start data
 Nufi_data.Efield = vPoisson(Nufi_params, Nufi_fs, Nufi_params.Charge[0])
 Nufi_data.Efield_list = np.zeros((Nufi_params.Nx_eval, Nufi_params.Nt_max + 1))
@@ -70,7 +70,7 @@ framenr = 1
 for i in range(Nufi_params.Nt_max):
     Nufi_params.it = i
     # print(f"in main loop, i={i}")
-    Nufi_params, Nufi_data, Nufi_fs = step(Nufi_params, Nufi_data, Nufi_fs)
+    Nufi_params, Nufi_data, Nufi_fs, V_new = step(Nufi_params, Nufi_data, Nufi_fs)
     # print("step called succesfully")
     time += Nufi_params.dt
     Nufi_params.time = time
@@ -79,16 +79,18 @@ for i in range(Nufi_params.Nt_max):
 
     # Plot at frequency
     if i % (Nufi_params.plot_freq) == 0:
-        plot_results(
-            Nufi_params,
-            Nufi_data,
-            Nufi_fs,
-            savedir="plots/frames",
-            savename=f"{framenr}",
-            saving=True,
-            fini=finitial,
-            ptype=ptype,
-        )
+        if _1D_diff_plot and diff_plots:
+            finitial = np.array([Nufi_params.fini_v(i) for i in V_new])
+            plot_results(
+                Nufi_params,
+                Nufi_data,
+                Nufi_fs,
+                savedir="plots/frames",
+                savename=f"{framenr}",
+                saving=True,
+                fini=finitial,
+                ptype=ptype,
+            )
         framenr += 1
 
 # Plot Final results

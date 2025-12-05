@@ -1,4 +1,5 @@
 from .fields import vPoisson, eval_f, wrap_periodic, E_spline
+from math import pi, sqrt, exp, cos
 import numpy as np
 
 
@@ -17,7 +18,7 @@ def NuFi(params, data, fs):
     iT = params.it + 1
     dt = params.dt
 
-    Efield, fs = Half_flow(
+    Efield, fs, V_new = Half_flow(
         n=iT,
         dt=dt,
         X=params.x_sampling_grid,
@@ -35,7 +36,13 @@ def NuFi(params, data, fs):
     data.Efield = Efield
     data.Efield_list[:, iT] = Efield
 
-    return params, data, fs
+    return params, data, fs, V_new
+
+
+def new_eval_f(params, x, v):
+    return (
+        (1 + params.eps * cos(params.k * x)) * v**2 / (sqrt(2 * pi)) * exp(-(v**2) / 2)
+    )
 
 
 def Half_flow(n, dt, X, V, Efield_list, params, charge, mass):
@@ -67,9 +74,9 @@ def Half_flow(n, dt, X, V, Efield_list, params, charge, mass):
     def Uv(X_, E):
         # Interpolate E(x) onto the X_ grid; returns shape like X_
         # x_mod = wrap_periodic(X_, params.x_sampling_grid)
-        dune_spline = E_spline(params, X_, params.x_sampling_grid, E)
+        spline = E_spline(params, X_, params.x_sampling_grid, E)
 
-        return np.array([dune_spline([x]) for x in X_])
+        return spline(X_)
 
     # Full steps if n > 2
     if n > 1:
@@ -85,8 +92,10 @@ def Half_flow(n, dt, X, V, Efield_list, params, charge, mass):
     V = V + 0.5 * dt * Uv(X, Efield_list_normed[:, 0])
 
     f_new = eval_f(params, X, V)
+    # x, v = np.meshgrid(X, V, indexing="ij")
+    # f_new = (params, x, v)
     E_new = vPoisson(params, f_new, charge)
-    return E_new, f_new
+    return E_new, f_new, V
 
 
 def step(params, data, fs):
@@ -94,7 +103,7 @@ def step(params, data, fs):
     Time step for simulation, update parameters, field, and fs
     """
 
-    params, data, fs = NuFi(params, data, fs)
+    params, data, fs, V_new = NuFi(params, data, fs)
     data.Efield_list[:, params.it] = data.Efield
 
-    return params, data, fs
+    return params, data, fs, V_new

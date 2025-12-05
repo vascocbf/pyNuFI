@@ -1,6 +1,5 @@
 import numpy as np
 from dune.common import FieldVector
-import dune.functions
 from scipy.interpolate import CubicSpline
 
 
@@ -39,22 +38,51 @@ def E_spline(params, x, x_grid, y) -> CubicSpline:
     # append duplicate endpoint for the spline only
     x_ext = np.concatenate([x_grid, [x0 + L]])
     F_ext = np.concatenate([Fgrid, [Fgrid[0]]])
-    basis = dune.functions.defaultGlobalBasis(
-        params.gridView, dune.functions.Lagrange(order=3)
-    )
 
-    coeffs = np.ndarray(len(basis))
-    basis.interpolate(
-        coeffs,
-        CubicSpline(x_ext, F_ext, bc_type="periodic"),
-    )
+    # basis = dune.functions.defaultGlobalBasis(
+    #     params.gridView, dune.functions.Lagrange(order=3)
+    # )
+    #
+    # coeffs = np.ndarray(len(basis))
+    # basis.interpolate(
+    #     coeffs,
+    #     CubicSpline(x_ext, F_ext, bc_type="periodic"),
+    # )
 
-    return basis.asFuntion(x_ext)
+    spline = CubicSpline(x_ext, F_ext, bc_type="periodic")
+
+    return spline
+
+
+def int_f(params, xi):
+    """
+    compute $int f(xi, v) dv$
+    """
+    v_min, v_max = params.gridView.lowerLeft[1], params.gridView.upperLeft[1]
+
+    v_points = np.linspace(v_min, v_max, num=params.Nv_eval)
+
+    dv = (v_max - v_min) / params.Nv_eval
+    integral = 0
+    a = FieldVector([0, 0])
+
+    for v in v_points:
+        a[0] = wrap_periodic(xi, params.x_sampling_grid)
+        a[1] = v
+        integral += params.fini(a) * dv
+    return integral
+
+
+# def compute_density(params, x_vals):
+#     densities = np.zeros(len(x_vals))
+#     for i, xi in enumerate(len(x_vals)):
+#         densities[i] = int_f(params, xi)
+#     return densities
 
 
 def compute_density(fs, v_vals):
     dv = v_vals[1] - v_vals[0]
-    return np.sum(fs * dv, axis=1)
+    return np.sum(fs, axis=1) * dv
 
 
 def vPoisson(params, fs, charge):
@@ -78,7 +106,7 @@ def vPoisson(params, fs, charge):
     rho = np.zeros(params.Nx_eval)
 
     # Compute total charge density
-    rho += charge * compute_density(fs, params.v_sampling_grid)
+    rho += charge * compute_density(fs, params.x_sampling_grid)
 
     kx = np.copy(params.kx)
     K2 = np.copy(params.kx2)

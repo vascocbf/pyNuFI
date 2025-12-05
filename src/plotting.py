@@ -18,22 +18,23 @@ def plot_results(
     ax = axes[0]
     if ptype == 0:
         if fini is not None:
-            fs_plot = fs[1] - fini
-            im = ax.scatter(V, fs_plot)
-            ax.set_title("f_t - 1/sqrt(2pi) v_0^2 exp(-v_0^2)")
+            fs_plot = fs - fini[np.newaxis, :]
+            im = ax.pcolormesh(X, V, fs_plot.T, shading="auto")
+            ax.set_title("f - 1/sqrt(2pi) v_0^2 exp(-v_0^2)")
         else:
             im = ax.pcolormesh(X, V, fs.T, shading="auto")
             ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
-            ax.set_xlabel(r"$x$")
-            ax.set_ylabel(r"$v$")
-            fig.colorbar(im, ax=ax)
+        ax.set_xlabel(r"$x$")
+        ax.set_ylabel(r"$v$")
+        fig.colorbar(im, ax=ax)
     elif ptype == 1:
         if fini is not None:
-            fs_plot = fs - fini
+            fs_plot = fini - fs
             im = ax.pcolormesh(X, V, fs_plot.T, shading="auto")
+            ax.set_title("f_{ini} - f")
         else:
             im = ax.pcolormesh(X, V, fs.T, shading="auto")
-        ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
+            ax.set_title(r"$f_\mathrm{" + params.S_name[0] + "}$")
         ax.set_xlabel(r"$x$")
         ax.set_ylabel(r"$v$")
         fig.colorbar(im, ax=ax)
